@@ -23,3 +23,24 @@ func RegisterUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
 }
+
+func LoginUser(c *gin.Context) {
+	var body models.User
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var user models.User
+
+	// Check if user exists with given username and password
+	result := database.DB.Where("username = ? AND password = ?", body.Username, body.Password).First(&user)
+
+	if result.Error != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+
+}
