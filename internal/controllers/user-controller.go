@@ -5,6 +5,7 @@ import (
 
 	"github.com/Starishine/cvwo-backend-go/internal/database"
 	"github.com/Starishine/cvwo-backend-go/internal/models"
+	"github.com/Starishine/cvwo-backend-go/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,6 +42,14 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+	// Generate JWT token
+	token, err := utils.GenerateToken(user.Username)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "token": token})
 
 }
