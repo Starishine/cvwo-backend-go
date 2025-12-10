@@ -15,6 +15,9 @@ func AuthRoutes(r *gin.Engine) {
 	post := r.Group("/")
 	{
 		post.POST("/post", controllers.AddPost)
+		post.GET("/post/:author", controllers.GetPostsByAuthor)
+		post.GET("/post/topics", controllers.GetAllTopics)
+		post.GET("/post/topic/:topic", controllers.GetPostsByTopic)
 	}
 
 }
