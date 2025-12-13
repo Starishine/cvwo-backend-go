@@ -86,7 +86,7 @@ func DeletePostByID(c *gin.Context) {
 
 	var post models.Post
 
-	result := database.DB.Model("posts").First(&post, "id = ?", c.Param("id"))
+	result := database.DB.Model(&models.Post{}).First(&post, "id = ?", c.Param("id"))
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
@@ -98,7 +98,7 @@ func DeletePostByID(c *gin.Context) {
 		return
 	}
 
-	delresult := database.DB.Model("posts").Delete(&models.Post{}, "id = ?", c.Param("id"))
+	delresult := database.DB.Model(&models.Post{}).Delete(&models.Post{}, "id = ?", c.Param("id"))
 	if delresult.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": delresult.Error.Error()})
 		return
