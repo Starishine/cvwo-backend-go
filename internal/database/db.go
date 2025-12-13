@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/Starishine/cvwo-backend-go/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -31,5 +32,11 @@ func ConnectDB() {
 		log.Fatal("Failed to connect to database: ", err)
 	}
 	DB = db
+
+	// Auto-migrate the database schema
+	DB.AutoMigrate(&models.User{})
+	DB.AutoMigrate(&models.Post{})
+	DB.AutoMigrate(&models.Comment{})
+
 	log.Println("Database is connected")
 }
