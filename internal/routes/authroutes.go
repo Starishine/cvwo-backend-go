@@ -20,6 +20,11 @@ func AuthRoutes(r *gin.Engine) {
 		post.GET("/post/id/:id", controllers.GetPostByID)
 		post.GET("/post/:author", controllers.GetPostsByAuthor)
 		post.DELETE("/deletepost/id/:id", controllers.DeletePostByID)
+
+		// Comments Routes
+		post.POST("/comment", controllers.AddComment)
+		post.GET("/comments/:postId", controllers.GetCommentsByPostID)
+		post.DELETE("/deletecomment/id/:id", controllers.DeleteCommentByID)
 	}
 
 }
