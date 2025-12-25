@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/Starishine/cvwo-backend-go/internal/database"
 	"github.com/Starishine/cvwo-backend-go/internal/models"
@@ -75,9 +74,7 @@ func GetPostByID(c *gin.Context) {
 }
 
 func DeletePostByID(c *gin.Context) {
-	authHeader := c.GetHeader("Authorization")
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	username, err := utils.ParseAccessToken(tokenString)
+	username, err := utils.GetUsernameFromAccessToken(c)
 
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Invalid or missing token"})

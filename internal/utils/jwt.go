@@ -3,8 +3,10 @@ package utils
 import (
 	"errors"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -31,6 +33,12 @@ func GenerateAccessToken(username string) (string, error) {
 // ParseAccessToken parses a JWT access token and returns the username
 func ParseAccessToken(tokenString string) (string, error) {
 	return parseJWT(tokenString)
+}
+
+func GetUsernameFromAccessToken(c *gin.Context) (string, error) {
+	authHeader := c.GetHeader("Authorization")
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	return ParseAccessToken(tokenString)
 }
 
 // Generates a refresh token valid for 7 days
