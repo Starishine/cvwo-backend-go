@@ -77,7 +77,7 @@ func GetPostByID(c *gin.Context) {
 func DeletePostByID(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	username, err := utils.ParseToken(tokenString)
+	username, err := utils.ParseAccessToken(tokenString)
 
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Invalid or missing token"})

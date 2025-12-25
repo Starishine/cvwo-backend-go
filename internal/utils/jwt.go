@@ -17,8 +17,8 @@ var jwtSecret = func() []byte {
 	return []byte("default_secret_key")
 }()
 
-// GenerateToken generates a JWT token for a given username
-func GenerateToken(username string) (string, error) {
+// GenerateAccessToken generates a JWT access token for a given username
+func GenerateAccessToken(username string) (string, error) {
 	claims := jwt.RegisteredClaims{
 		Subject:   username,
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
@@ -28,8 +28,28 @@ func GenerateToken(username string) (string, error) {
 	return token.SignedString(jwtSecret)
 }
 
-// ParseToken parses a JWT token and returns the username
-func ParseToken(tokenString string) (string, error) {
+// ParseAccessToken parses a JWT access token and returns the username
+func ParseAccessToken(tokenString string) (string, error) {
+	return parseJWT(tokenString)
+}
+
+// Generates a refresh token valid for 7 days
+func GenerateRefreshToken(username string) (string, error) {
+	claims := jwt.RegisteredClaims{
+		Subject:   username,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(jwtSecret)
+}
+
+func ParseRefreshToken(tokenString string) (string, error) {
+	return parseJWT(tokenString)
+}
+
+func parseJWT(tokenString string) (string, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})
