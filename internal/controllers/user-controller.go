@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/Starishine/cvwo-backend-go/internal/database"
@@ -64,7 +65,8 @@ func LoginUser(c *gin.Context) {
 		Secure:   false,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
-		Path:     "/auth/refresh",
+		Path:     "/",
+		Domain:   "localhost",
 		MaxAge:   7 * 24 * 60 * 60, // 7 days
 	})
 
@@ -74,19 +76,34 @@ func LoginUser(c *gin.Context) {
 }
 
 func RefreshToken(c *gin.Context) {
+	log.Println("=== REFRESH TOKEN ENDPOINT CALLED ===")
+
+	// Log ALL cookies
+	cookies := c.Request.Cookies()
+	log.Printf("All cookies received: %d", len(cookies))
+	for _, c := range cookies {
+		log.Printf("Cookie: %s = %s", c.Name, c.Value)
+	}
+
 	// get refresh token from cookie
 	cookie, err := c.Request.Cookie("refresh_token")
 	if err != nil {
+		log.Println("ERROR: No refresh token cookie found")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "No refresh token provided"})
 		return
 	}
 
+	log.Printf("Found refresh token: %s", cookie.Value)
+
 	// validate refresh token and get username
 	username, err := utils.ParseRefreshToken(cookie.Value)
 	if err != nil {
+		log.Println("ERROR: Invalid refresh token")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
 		return
 	}
+
+	log.Printf("Valid token for user: %s", username)
 
 	// generate new access token
 	newAccessToken, err := utils.GenerateAccessToken(username)
@@ -109,7 +126,8 @@ func RefreshToken(c *gin.Context) {
 		HttpOnly: true,
 		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
-		Path:     "/auth/refresh",
+		Path:     "/",
+		Domain:   "localhost",
 		MaxAge:   7 * 24 * 60 * 60,
 	})
 
