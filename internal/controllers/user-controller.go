@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/Starishine/cvwo-backend-go/internal/database"
@@ -57,16 +59,10 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	// Store refresh token in HttpOnly cookie
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:     "refresh_token",
-		Value:    refreshToken,
-		Secure:   false,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-		Path:     "/auth/refresh",
-		MaxAge:   7 * 24 * 60 * 60, // 7 days
-	})
+	// Use raw header to set cookie
+	c.Writer.Header().Set("Set-Cookie",
+		fmt.Sprintf("refresh_token=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=Lax",
+			refreshToken, 7*24*60*60))
 
 	// return access token in JSON response
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "access_token": accessToken})
@@ -74,19 +70,34 @@ func LoginUser(c *gin.Context) {
 }
 
 func RefreshToken(c *gin.Context) {
+	log.Println("=== REFRESH TOKEN ENDPOINT CALLED ===")
+
+	// Log ALL cookies
+	cookies := c.Request.Cookies()
+	log.Printf("All cookies received: %d", len(cookies))
+	for _, c := range cookies {
+		log.Printf("Cookie: %s = %s", c.Name, c.Value)
+	}
+
 	// get refresh token from cookie
 	cookie, err := c.Request.Cookie("refresh_token")
 	if err != nil {
+		log.Println("ERROR: No refresh token cookie found")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "No refresh token provided"})
 		return
 	}
 
+	log.Printf("Found refresh token: %s", cookie.Value)
+
 	// validate refresh token and get username
 	username, err := utils.ParseRefreshToken(cookie.Value)
 	if err != nil {
+		log.Println("ERROR: Invalid refresh token")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
 		return
 	}
+
+	log.Printf("Valid token for user: %s", username)
 
 	// generate new access token
 	newAccessToken, err := utils.GenerateAccessToken(username)
@@ -95,23 +106,17 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
-	// rotate refresh token cookie
+	// gererate new refresh token
 	refreshToken, err := utils.GenerateRefreshToken(username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
 		return
 	}
 
-	// Overwrite refresh token in HttpOnly cookie
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:     "refresh_token",
-		Value:    refreshToken,
-		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
-		Path:     "/auth/refresh",
-		MaxAge:   7 * 24 * 60 * 60,
-	})
+	// Use raw header to set cookie
+	c.Writer.Header().Set("Set-Cookie",
+		fmt.Sprintf("refresh_token=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=Lax",
+			refreshToken, 7*24*60*60))
 
 	// return access token in JSON response
 	c.JSON(http.StatusOK, gin.H{"access_token": newAccessToken})

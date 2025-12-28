@@ -11,6 +11,7 @@ func AuthRoutes(r *gin.Engine) {
 		auth.POST("/register", controllers.RegisterUser)
 		auth.POST("/login", controllers.LoginUser)
 		auth.POST("/refresh", controllers.RefreshToken)
+		auth.POST("/logout", controllers.LogoutUser)
 	}
 
 	post := r.Group("/")
@@ -26,6 +27,7 @@ func AuthRoutes(r *gin.Engine) {
 		post.POST("/comment", controllers.AddComment)
 		post.GET("/comments/:postId", controllers.GetCommentsByPostID)
 		post.DELETE("/deletecomment/id/:id", controllers.DeleteCommentByID)
+		post.GET("/comments/replies/:parentId", controllers.GetRepliesByCommentID)
 	}
 
 }

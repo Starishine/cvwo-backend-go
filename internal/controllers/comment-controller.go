@@ -29,6 +29,7 @@ func AddComment(c *gin.Context) {
 func GetCommentsByPostID(c *gin.Context) {
 	var comments []models.Comment
 	result := database.DB.Model(&models.Comment{}).Where("post_id = ?", c.Param("postId")).
+		Where("parent_id IS NULL").
 		Order("created_at DESC").Find(&comments)
 
 	if result.Error != nil {
@@ -65,4 +66,17 @@ func DeleteCommentByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Comment deleted successfully"})
+}
+
+// retrieve replies for a specific comment
+func GetRepliesByCommentID(c *gin.Context) {
+	var replies []models.Comment
+	result := database.DB.Model(&models.Comment{}).Where("parent_id = ?", c.Param("parentId")).
+		Order("created_at ASC").Find(&replies)
+
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"replies": replies})
 }

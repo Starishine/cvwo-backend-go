@@ -4,7 +4,8 @@ import "gorm.io/gorm"
 
 type Comment struct {
 	gorm.Model
-	PostID  uint   `json:"post_id" gorm:"index"`
-	Comment string `json:"comment"`
-	Author  string `json:"author"`
+	PostID   uint   `json:"post_id" gorm:"index"`
+	Comment  string `json:"comment"`
+	Author   string `json:"author"`
+	ParentID uint   `json:"parent_id,omitempty" gorm:"index"`
 }
