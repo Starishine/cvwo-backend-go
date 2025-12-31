@@ -45,7 +45,7 @@ func LoginUser(c *gin.Context) {
 	}
 
 	// Generate JWT access token
-	accessToken, err := utils.GenerateAccessToken(user.Username)
+	accessToken, err := utils.GenerateAccessToken(user.Username, user.ID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
@@ -53,7 +53,7 @@ func LoginUser(c *gin.Context) {
 	}
 
 	// Generate refresh token
-	refreshToken, err := utils.GenerateRefreshToken(user.Username)
+	refreshToken, err := utils.GenerateRefreshToken(user.Username, user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
 		return
@@ -90,7 +90,9 @@ func RefreshToken(c *gin.Context) {
 	log.Printf("Found refresh token: %s", cookie.Value)
 
 	// validate refresh token and get username
-	username, err := utils.ParseRefreshToken(cookie.Value)
+	username, _, err := utils.ParseRefreshToken(cookie.Value)
+	_, userId, err := utils.ParseRefreshToken(cookie.Value)
+
 	if err != nil {
 		log.Println("ERROR: Invalid refresh token")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
@@ -98,16 +100,17 @@ func RefreshToken(c *gin.Context) {
 	}
 
 	log.Printf("Valid token for user: %s", username)
+	log.Printf("UserId: %s", userId)
 
 	// generate new access token
-	newAccessToken, err := utils.GenerateAccessToken(username)
+	newAccessToken, err := utils.GenerateAccessToken(username, userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate new token"})
 		return
 	}
 
 	// gererate new refresh token
-	refreshToken, err := utils.GenerateRefreshToken(username)
+	refreshToken, err := utils.GenerateRefreshToken(username, userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
 		return

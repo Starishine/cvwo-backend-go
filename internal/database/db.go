@@ -21,12 +21,6 @@ func ConnectDB() {
 		os.Getenv("DB_PORT"),
 	)
 
-	fmt.Println("HOST", os.Getenv("DB_HOST"))
-	fmt.Println("USER:", os.Getenv("DB_USER"))
-	fmt.Println("PASS:", os.Getenv("DB_PASSWORD"))
-	fmt.Println("NAME:", os.Getenv("DB_NAME"))
-	fmt.Println("PORT:", os.Getenv("DB_PORT"))
-
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database: ", err)
@@ -37,6 +31,7 @@ func ConnectDB() {
 	DB.AutoMigrate(&models.User{})
 	DB.AutoMigrate(&models.Post{})
 	DB.AutoMigrate(&models.Comment{})
+	DB.AutoMigrate(&models.Like{})
 
 	log.Println("Database is connected")
 }
