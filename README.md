@@ -4,7 +4,7 @@
 ## About 
 A web application for blogging
 
-## Instructions to set up the frontend server
+## Instructions to set up the backend server
 
 1. **Clone the repository**  
     ```bash
@@ -19,5 +19,5 @@ A web application for blogging
     ```bash
    go run .
     ```
-## For frontednd setup
+## For frontend setup
 Please refer to the [frontend repository’s README](https://github.com/Starishine/cvwo-frontend-react) for further instructions.
