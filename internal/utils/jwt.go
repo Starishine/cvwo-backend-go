@@ -19,55 +19,79 @@ var jwtSecret = func() []byte {
 	return []byte("default_secret_key")
 }()
 
+// custom claim to include username and user id
+type CustomClaims struct {
+	Username string `json:"username"`
+	UserID   uint   `json:"user_id"`
+	jwt.RegisteredClaims
+}
+
 // GenerateAccessToken generates a JWT access token for a given username
-func GenerateAccessToken(username string) (string, error) {
-	claims := jwt.RegisteredClaims{
-		Subject:   username,
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
+func GenerateAccessToken(username string, userID uint) (string, error) {
+	claims := CustomClaims{
+		Username: username,
+		UserID:   userID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   username,
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(jwtSecret)
 }
 
-// ParseAccessToken parses a JWT access token and returns the username
-func ParseAccessToken(tokenString string) (string, error) {
+// ParseAccessToken parses a JWT access token and returns the username and userID
+func ParseAccessToken(tokenString string) (string, uint, error) {
 	return parseJWT(tokenString)
 }
 
 func GetUsernameFromAccessToken(c *gin.Context) (string, error) {
 	authHeader := c.GetHeader("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	return ParseAccessToken(tokenString)
+	username, _, err := ParseAccessToken(tokenString)
+	return username, err
+}
+
+func GetUserIDFromAccessToken(c *gin.Context) (uint, error) {
+	authHeader := c.GetHeader("Authorization")
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	_, userID, err := ParseAccessToken(tokenString)
+	return userID, err
 }
 
 // Generates a refresh token valid for 7 days
-func GenerateRefreshToken(username string) (string, error) {
-	claims := jwt.RegisteredClaims{
-		Subject:   username,
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
+func GenerateRefreshToken(username string, userID uint) (string, error) {
+	claims := CustomClaims{
+		Username: username,
+		UserID:   userID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   username,
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(jwtSecret)
 }
 
-func ParseRefreshToken(tokenString string) (string, error) {
+func ParseRefreshToken(tokenString string) (string, uint, error) {
 	return parseJWT(tokenString)
 }
 
-func parseJWT(tokenString string) (string, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+// parses token and returns username and userID
+func parseJWT(tokenString string) (string, uint, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})
 
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 
-	if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok && token.Valid {
-		return claims.Subject, nil
+	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
+		return claims.Username, claims.UserID, nil
 	}
-	return "", errors.New("invalid token claims")
+	return "", 0, errors.New("invalid token claims")
 }

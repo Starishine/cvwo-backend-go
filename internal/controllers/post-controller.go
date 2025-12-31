@@ -114,3 +114,14 @@ func GetAllPosts(c *gin.Context) {
 
 	c.JSON(http.StatusOK, posts)
 }
+
+func GetLikesFromPostId(c *gin.Context) {
+	var post models.Post
+	result := database.DB.Model(&models.Post{}).First(&post, "id = ?", c.Param("id"))
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, post.Likes)
+}
