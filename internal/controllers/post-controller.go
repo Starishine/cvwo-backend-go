@@ -125,3 +125,45 @@ func GetLikesFromPostId(c *gin.Context) {
 
 	c.JSON(http.StatusOK, post.Likes)
 }
+
+func EditPostbyId(c *gin.Context) {
+	username, err := utils.GetUsernameFromAccessToken(c)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Invalid or missing token"})
+		return
+	}
+
+	var post models.Post
+
+	if err := database.DB.First(&post, "id = ?", c.Param("id")).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
+	// Check if the current user is the author
+	if post.Author != username {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You can only edit your own posts"})
+		return
+	}
+
+	var updatedPost models.Post
+	if err := c.ShouldBindJSON(&updatedPost); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Update fields if any
+	post.Topic = updatedPost.Topic
+	post.Title = updatedPost.Title
+	post.Content = updatedPost.Content
+
+	// Save changes
+	if err := database.DB.Save(&post).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, post)
+
+}
