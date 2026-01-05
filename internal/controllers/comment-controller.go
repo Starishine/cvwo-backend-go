@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Starishine/cvwo-backend-go/internal/database"
@@ -29,13 +30,14 @@ func AddComment(c *gin.Context) {
 func GetCommentsByPostID(c *gin.Context) {
 	var comments []models.Comment
 	result := database.DB.Model(&models.Comment{}).Where("post_id = ?", c.Param("postId")).
-		Where("parent_id IS NULL").
+		Where("parent_id IS NULL OR parent_id = 0").
 		Order("created_at DESC").Find(&comments)
 
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
 	}
+	fmt.Println(comments)
 	c.JSON(http.StatusOK, comments)
 }
 
