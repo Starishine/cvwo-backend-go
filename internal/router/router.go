@@ -1,6 +1,7 @@
 package router
 
 import (
+	"os"
 	"time"
 
 	"github.com/Starishine/cvwo-backend-go/internal/routes"
@@ -10,8 +11,12 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:5173" // Fallback for local dev
+	}
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     []string{frontendURL},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
