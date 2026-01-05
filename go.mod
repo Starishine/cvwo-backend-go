@@ -1,6 +1,6 @@
 module github.com/Starishine/cvwo-backend-go
 
-go 1.25.5
+go 1.25.0
 
 require gorm.io/gorm v1.31.1
 
