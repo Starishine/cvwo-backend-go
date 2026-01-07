@@ -13,11 +13,10 @@ var DB *gorm.DB
 
 func ConnectDB() {
 
-	dsn := os.Getenv("DATABASE_URL") // pulls url from renders settings
+	dsn := os.Getenv("DATABASE_URL") // pulls url from renders settings/local .env
 
 	if dsn == "" {
-		// used for your local development
-		dsn = "host=localhost user=postgres password=... dbname=cvwo_db port=5432 sslmode=disable"
+		log.Fatal("DATABASE_URL environment variable is not set")
 	}
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
