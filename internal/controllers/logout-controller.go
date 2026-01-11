@@ -17,8 +17,8 @@ func LogoutUser(c *gin.Context) {
 	}
 
 	// Using raw header to clear cookie
-	c.Writer.Header().Add("Set-Cookie", "refresh_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax")
-	c.Writer.Header().Add("Set-Cookie", "refresh_token=; Path=/; Domain=localhost; Max-Age=0; HttpOnly; SameSite=Lax")
+	c.Writer.Header().Add("Set-Cookie", "refresh_token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=None;")
+	c.Writer.Header().Add("Set-Cookie", "refresh_token=; Path=/; Domain=localhost; Max-Age=0; HttpOnly; Secure; SameSite=None;")
 
 	log.Println("Sent Set-Cookie headers to clear cookie")
 
