@@ -61,7 +61,7 @@ func LoginUser(c *gin.Context) {
 
 	// Use raw header to set cookie
 	c.Writer.Header().Set("Set-Cookie",
-		fmt.Sprintf("refresh_token=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=Lax",
+		fmt.Sprintf("refresh_token=%s; Path=/; Max-Age=%d; HttpOnly; Secure; SameSite=None",
 			refreshToken, 7*24*60*60))
 
 	// return access token in JSON response
@@ -118,7 +118,7 @@ func RefreshToken(c *gin.Context) {
 
 	// Use raw header to set cookie
 	c.Writer.Header().Set("Set-Cookie",
-		fmt.Sprintf("refresh_token=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=Lax",
+		fmt.Sprintf("refresh_token=%s; Path=/; Max-Age=%d; HttpOnly; Secure; SameSite=None",
 			refreshToken, 7*24*60*60))
 
 	// return access token in JSON response
