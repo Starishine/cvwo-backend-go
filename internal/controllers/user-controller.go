@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"github.com/Starishine/cvwo-backend-go/internal/models"
 	"github.com/Starishine/cvwo-backend-go/internal/utils"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // RegisterUser handles user registration
@@ -20,6 +22,15 @@ func RegisterUser(c *gin.Context) {
 	}
 
 	result := database.DB.Create(&user)
+
+	if result.Error != nil && errors.Is(result.Error, gorm.ErrDuplicatedKey) {
+		c.JSON(http.StatusConflict, gin.H{"error": "Username already exists"})
+		return
+	}
+	if result.ErrDuplicateicateKey != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Username already exists"})
+		return
+	}
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
