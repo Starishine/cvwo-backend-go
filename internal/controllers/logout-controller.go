@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// LogoutUser handles user logout by clearing the refresh token cookie
 func LogoutUser(c *gin.Context) {
 	log.Println("=== LOGOUT ENDPOINT CALLED ===")
 

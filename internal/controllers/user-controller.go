@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// RegisterUser handles user registration
 func RegisterUser(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -27,6 +28,7 @@ func RegisterUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
 }
 
+// LoginUser handles user login and token generation
 func LoginUser(c *gin.Context) {
 	var body models.User
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -69,6 +71,7 @@ func LoginUser(c *gin.Context) {
 
 }
 
+// RefreshToken handles token refreshing
 func RefreshToken(c *gin.Context) {
 	log.Println("=== REFRESH TOKEN ENDPOINT CALLED ===")
 
@@ -89,7 +92,7 @@ func RefreshToken(c *gin.Context) {
 
 	log.Printf("Found refresh token: %s", cookie.Value)
 
-	// validate refresh token and get username
+	// validate refresh token and get username and userId
 	username, _, err := utils.ParseRefreshToken(cookie.Value)
 	_, userId, err := utils.ParseRefreshToken(cookie.Value)
 
@@ -100,7 +103,7 @@ func RefreshToken(c *gin.Context) {
 	}
 
 	log.Printf("Valid token for user: %s", username)
-	log.Printf("UserId: %s", userId)
+	log.Printf("UserId: %d", userId)
 
 	// generate new access token
 	newAccessToken, err := utils.GenerateAccessToken(username, userId)
