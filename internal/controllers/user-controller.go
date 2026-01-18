@@ -10,7 +10,7 @@ import (
 	"github.com/Starishine/cvwo-backend-go/internal/models"
 	"github.com/Starishine/cvwo-backend-go/internal/utils"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 // RegisterUser handles user registration
@@ -23,12 +23,15 @@ func RegisterUser(c *gin.Context) {
 
 	result := database.DB.Create(&user)
 
-	if result.Error != nil && errors.Is(result.Error, gorm.ErrDuplicatedKey) {
-		c.JSON(http.StatusConflict, gin.H{"error": "Username already exists. Please choose a different username."})
-		return
-	}
-
+	// handle unique constraint for username
 	if result.Error != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(result.Error, &pgErr) {
+			if pgErr.Code == "23505" { // unique_violation
+				c.JSON(http.StatusConflict, gin.H{"error": "Username already exists. Please choose a different username."})
+				return
+			}
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
 	}
