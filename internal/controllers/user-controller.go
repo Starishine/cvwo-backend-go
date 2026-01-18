@@ -24,13 +24,10 @@ func RegisterUser(c *gin.Context) {
 	result := database.DB.Create(&user)
 
 	if result.Error != nil && errors.Is(result.Error, gorm.ErrDuplicatedKey) {
-		c.JSON(http.StatusConflict, gin.H{"error": "Username already exists"})
+		c.JSON(http.StatusConflict, gin.H{"error": "Username already exists. Please choose a different username."})
 		return
 	}
-	if result.ErrDuplicateicateKey != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Username already exists"})
-		return
-	}
+
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
