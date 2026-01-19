@@ -24,3 +24,6 @@ User Manual -> https://docs.google.com/document/d/1qcohUkzilBTzwYY3dD9NVENnuuhdz
     ```
 ## For frontend setup
 Please refer to the [frontend repository’s README](https://github.com/Starishine/cvwo-frontend-react) for further instructions.
+
+## AI Declaration 
+- Used Gemini to generate sample post title and content for demonstration purpose
